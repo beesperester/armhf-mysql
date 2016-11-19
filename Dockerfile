@@ -9,11 +9,11 @@ RUN groupadd -r mysql && useradd -r -g mysql mysql
 RUN mkdir /docker-entrypoint-initdb.d
 
 # preconfigure mysql-server
-RUN echo "mysql-server mysql-server/root_password password ''" | debconf-set-selections
-RUN echo "mysql-server mysql-server/root_password_again password ''" | debconf-set-selections
+RUN echo "mysql-server mysql-server/root_password password ''" | debconf-set-selections \
+	&& echo "mysql-server mysql-server/root_password_again password ''" | debconf-set-selections
 
 # install mysql-server
-RUN && apt-get update && apt-get install -y mysql-server && rm -rf /var/lib/apt/lists/* \
+RUN apt-get update && apt-get install -y mysql-server && rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
 	&& chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
 	&& chmod 777 /var/run/mysqld
