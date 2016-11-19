@@ -7,7 +7,13 @@ MAINTAINER Bernhard Esperester <bernhard@esperester.de>
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
 # install mysql-server
-RUN apt-get update && apt-get -y install mysql-server && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN { \
+		echo mysql-community-server mysql-community-server/data-dir select ''; \
+		echo mysql-community-server mysql-community-server/root-pass password ''; \
+		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
+		echo mysql-community-server mysql-community-server/remove-test-db select false; \
+	} | debconf-set-selections \
+	apt-get update && apt-get -y install mysql-server && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # fix folder permissions
 RUN rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
