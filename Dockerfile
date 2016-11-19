@@ -7,6 +7,7 @@ MAINTAINER Bernhard Esperester <bernhard@esperester.de>
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
 # configure mysql-server
+RUN export DEBIAN_FRONTEND=noninteractive
 RUN { \
 		echo mysql-server mysql-server/data-dir select ''; \
 		echo mysql-server mysql-server/root-pass password ''; \
@@ -15,7 +16,7 @@ RUN { \
 	} | debconf-set-selections
 
 # install mysql-server
-RUN apt-get update && apt-get -y install mysql-server && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && -E apt-get -y install mysql-server && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # fix folder permissions
 RUN rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
