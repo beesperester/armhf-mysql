@@ -7,10 +7,12 @@ MAINTAINER Bernhard Esperester <bernhard@esperester.de>
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
 # configure mysql-server
-RUN debconf-set-selections <<< "mysql-community-server mysql-community-server/data-dir select ''"
-RUN debconf-set-selections <<< "mysql-community-server mysql-community-server/root-pass password ''"
-RUN debconf-set-selections <<< "mysql-community-server mysql-community-server/re-root-pass password ''"
-RUN debconf-set-selections <<< "mysql-community-server mysql-community-server/remove-test-db select false"
+RUN { \
+		echo mysql-community-server mysql-community-server/data-dir select ''; \
+		echo mysql-community-server mysql-community-server/root-pass password ''; \
+		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
+		echo mysql-community-server mysql-community-server/remove-test-db select false; \
+	} | debconf-set-selections
 
 # install mysql-server
 RUN apt-get update && apt-get -y install mysql-server && apt-get clean && rm -rf /var/lib/apt/lists/*
