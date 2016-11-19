@@ -8,10 +8,10 @@ RUN groupadd -r mysql && useradd -r -g mysql mysql
 
 # configure mysql-server
 RUN { \
-		echo mysql-community-server mysql-community-server/data-dir select ''; \
-		echo mysql-community-server mysql-community-server/root-pass password ''; \
-		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
-		echo mysql-community-server mysql-community-server/remove-test-db select false; \
+		echo mysql-server mysql-server/data-dir select ''; \
+		echo mysql-server mysql-server/root-pass password ''; \
+		echo mysql-server mysql-server/re-root-pass password ''; \
+		echo mysql-server mysql-server/remove-test-db select false; \
 	} | debconf-set-selections
 
 # install mysql-server
