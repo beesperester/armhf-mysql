@@ -6,14 +6,14 @@ MAINTAINER Bernhard Esperester <bernhard@esperester.de>
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
 
+# configure mysql-server
+RUN debconf-set-selections <<< 'mysql-community-server mysql-community-server/data-dir select' \
+	debconf-set-selections <<< 'mysql-community-server mysql-community-server/root-pass password' \
+	debconf-set-selections <<< 'mysql-community-server mysql-community-server/re-root-pass password' \
+	debconf-set-selections <<< 'mysql-community-server mysql-community-server/remove-test-db select false'
+
 # install mysql-server
-RUN { \
-		echo mysql-community-server mysql-community-server/data-dir select ''; \
-		echo mysql-community-server mysql-community-server/root-pass password ''; \
-		echo mysql-community-server mysql-community-server/re-root-pass password ''; \
-		echo mysql-community-server mysql-community-server/remove-test-db select false; \
-	} | debconf-set-selections \
-	apt-get update && apt-get -y install mysql-server && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get -y install mysql-server && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # fix folder permissions
 RUN rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
