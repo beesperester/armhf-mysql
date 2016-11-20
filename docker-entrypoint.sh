@@ -59,6 +59,8 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		fi
 
 		mkdir -p "$DATADIR"
+		
+		chown -R mysql:mysql "$DATADIR"
 
 		echo 'Initializing database'
 		#"$@" --initialize-insecure
