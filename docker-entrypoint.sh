@@ -19,7 +19,7 @@ for arg; do
 done
 
 _check_config() {
-	toRun=( "$@" --verbose --help )
+	toRun=( "$@" --verbose --help --log-bin-index="$(mktemp -u)" )
 	if ! errors="$("${toRun[@]}" 2>&1 >/dev/null)"; then
 		cat >&2 <<-EOM
 
@@ -33,7 +33,7 @@ _check_config() {
 }
 
 _datadir() {
-	"$@" --verbose --help 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
+	"$@" --verbose --help --log-bin-index="$(mktemp -u)" 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
 }
 
 # allow the container to be started with `--user`
@@ -61,10 +61,10 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		mkdir -p "$DATADIR"
 
 		echo 'Initializing database'
-		#"$@" --initialize-insecure
+		mysql_install_db --datadir="$DATADIR" --rpm --basedir=/usr/local/mysql
 		echo 'Database initialized'
 
-		"$@" --skip-networking &
+		"$@" --skip-networking --basedir=/usr/local/mysql &
 		pid="$!"
 
 		mysql=( mysql --protocol=socket -uroot -hlocalhost)
@@ -133,9 +133,9 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		done
 
 		if [ ! -z "$MYSQL_ONETIME_PASSWORD" ]; then
-			"${mysql[@]}" <<-EOSQL
-				ALTER USER 'root'@'%' PASSWORD EXPIRE;
-			EOSQL
+			echo >&2
+			echo >&2 'Sorry, this version of MySQL does not support "PASSWORD EXPIRE" (required for MYSQL_ONETIME_PASSWORD).'
+			echo >&2
 		fi
 		if ! kill -s TERM "$pid" || ! wait "$pid"; then
 			echo >&2 'MySQL init process failed.'
