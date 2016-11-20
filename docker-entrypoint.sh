@@ -63,10 +63,10 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		chown -R mysql:mysql "$DATADIR"
 
 		echo 'Initializing database'
-		"$@" --initialize-insecure
+		mysql_install_db --datadir="$DATADIR" --rpm --basedir=/usr/local/mysql
 		echo 'Database initialized'
 
-		"$@" --skip-networking &
+		"$@" --skip-networking --basedir=/usr/local/mysql &
 		pid="$!"
 
 		mysql=( mysql --protocol=socket -uroot -hlocalhost)
