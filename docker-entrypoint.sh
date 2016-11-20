@@ -1,31 +1,3 @@
-
-Skip to content
-This repository
-
-    Pull requests
-    Issues
-    Gist
-
-    @CreoAtive
-
-1
-0
-
-    0
-
-CreoAtive/armhf-mysql
-Code
-Issues 0
-Pull requests 0
-Projects 0
-Wiki
-Pulse
-Graphs
-Settings
-armhf-mysql/docker-entrypoint.sh
-1b660c6 5 hours ago
-@CreoAtive CreoAtive Create docker-entrypoint.sh
-152 lines (125 sloc) 3.8 KB
 #!/bin/bash
 set -eo pipefail
 shopt -s nullglob
@@ -50,8 +22,10 @@ _check_config() {
 	toRun=( "$@" --verbose --help )
 	if ! errors="$("${toRun[@]}" 2>&1 >/dev/null)"; then
 		cat >&2 <<-EOM
+
 			ERROR: mysqld failed while attempting to check config
 			command was: "${toRun[*]}"
+
 			$errors
 		EOM
 		exit 1
@@ -120,6 +94,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 			-- What's done in this file shouldn't be replicated
 			--  or products like mysql-fabric won't work
 			SET @@SESSION.SQL_LOG_BIN=0;
+
 			DELETE FROM mysql.user ;
 			CREATE USER 'root'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}' ;
 			GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION ;
@@ -174,8 +149,3 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 fi
 
 exec "$@"
-
-    Contact GitHub API Training Shop Blog About 
-
-    © 2016 GitHub, Inc. Terms Privacy Security Status Help 
-
