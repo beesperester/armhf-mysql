@@ -63,7 +63,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		chown -R mysql:mysql "$DATADIR"
 
 		echo 'Initializing database'
-		#"$@" --initialize-insecure
+		"$@" --initialize-insecure
 		echo 'Database initialized'
 
 		"$@" --skip-networking &
