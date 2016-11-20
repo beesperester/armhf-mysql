@@ -27,8 +27,20 @@ RUN echo "mysql-server mysql-server/root_password password ''" | debconf-set-sel
 	&& echo "mysql-server mysql-server/root_password_again password ''" | debconf-set-selections
 
 # install mysql-server
-RUN apt-get update && apt-get install -y mysql-server && rm -rf /var/lib/apt/lists/* \
-	&& rm -rf /var/lib/mysql && mkdir -p /var/lib/mysql /var/run/mysqld \
+RUN apt-get update && apt-get install -y mysql-server && rm -rf /var/lib/apt/lists/*
+
+# replicate some of the way the APT package configuration works
+# this is only for 5.5 since it doesn't have an APT repo, and will go away when 5.5 does
+RUN mkdir -p /etc/mysql/conf.d \
+	&& { \
+		echo '[mysqld]'; \
+		echo 'skip-host-cache'; \
+		echo 'skip-name-resolve'; \
+		echo 'datadir = /var/lib/mysql'; \
+		echo '!includedir /etc/mysql/conf.d/'; \
+	} > /etc/mysql/my.cnf
+
+RUN mkdir -p /var/lib/mysql /var/run/mysqld \
 	&& chown -R mysql:mysql /var/lib/mysql /var/run/mysqld \
 	&& chmod 777 /var/run/mysqld
 
