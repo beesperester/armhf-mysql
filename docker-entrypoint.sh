@@ -19,7 +19,7 @@ for arg; do
 done
 
 _check_config() {
-	toRun=( "$@" --verbose --help --log-bin-index="$(mktemp -u)" )
+	toRun=( "$@" --verbose --help )
 	if ! errors="$("${toRun[@]}" 2>&1 >/dev/null)"; then
 		cat >&2 <<-EOM
 
@@ -33,17 +33,17 @@ _check_config() {
 }
 
 _datadir() {
-	"$@" --verbose --help --log-bin-index="$(mktemp -u)" 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
+	"$@" --verbose --help 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
 }
 
 # allow the container to be started with `--user`
-if [ "$1" = 'mysqld' -a -z "$wantHelp" -a "$(id -u)" = '0' ]; then
-	_check_config "$@"
-	DATADIR="$(_datadir "$@")"
-	mkdir -p "$DATADIR"
-	chown -R mysql:mysql "$DATADIR"
-	exec gosu mysql "$BASH_SOURCE" "$@"
-fi
+#if [ "$1" = 'mysqld' -a -z "$wantHelp" -a "$(id -u)" = '0' ]; then
+#	_check_config "$@"
+#	DATADIR="$(_datadir "$@")"
+#	mkdir -p "$DATADIR"
+#	chown -R mysql:mysql "$DATADIR"
+#	exec gosu mysql "$BASH_SOURCE" "$@"
+#fi
 
 if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 	# still need to check config, container may have started with --user
@@ -61,10 +61,10 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		mkdir -p "$DATADIR"
 
 		echo 'Initializing database'
-		mysql_install_db --datadir="$DATADIR" --rpm --basedir=/usr/local/mysql
+		#"$@" --initialize-insecure
 		echo 'Database initialized'
 
-		"$@" --skip-networking --basedir=/usr/local/mysql &
+		"$@" --skip-networking &
 		pid="$!"
 
 		mysql=( mysql --protocol=socket -uroot -hlocalhost)
@@ -86,10 +86,10 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 			mysql_tzinfo_to_sql /usr/share/zoneinfo | sed 's/Local time zone must be set--see zic manual page/FCTY/' | "${mysql[@]}" mysql
 		fi
 
-		if [ ! -z "$MYSQL_RANDOM_ROOT_PASSWORD" ]; then
-			MYSQL_ROOT_PASSWORD="$(pwgen -1 32)"
-			echo "GENERATED ROOT PASSWORD: $MYSQL_ROOT_PASSWORD"
-		fi
+		#if [ ! -z "$MYSQL_RANDOM_ROOT_PASSWORD" ]; then
+		#	MYSQL_ROOT_PASSWORD="$(pwgen -1 32)"
+		#	echo "GENERATED ROOT PASSWORD: $MYSQL_ROOT_PASSWORD"
+		#fi
 		"${mysql[@]}" <<-EOSQL
 			-- What's done in this file shouldn't be replicated
 			--  or products like mysql-fabric won't work
@@ -133,9 +133,9 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		done
 
 		if [ ! -z "$MYSQL_ONETIME_PASSWORD" ]; then
-			echo >&2
-			echo >&2 'Sorry, this version of MySQL does not support "PASSWORD EXPIRE" (required for MYSQL_ONETIME_PASSWORD).'
-			echo >&2
+			"${mysql[@]}" <<-EOSQL
+				ALTER USER 'root'@'%' PASSWORD EXPIRE;
+			EOSQL
 		fi
 		if ! kill -s TERM "$pid" || ! wait "$pid"; then
 			echo >&2 'MySQL init process failed.'
