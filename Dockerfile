@@ -26,8 +26,8 @@ RUN apt-get update && apt-get install -y mysql-server && rm -rf /var/lib/apt/lis
 VOLUME /var/lib/mysql
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s /usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh # backwards compat
-ENTRYPOINT ["docker-entrypoint.sh"]
+RUN ln -s /usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 3306
 CMD ["mysqld"]
