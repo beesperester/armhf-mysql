@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y mysql-server && rm -rf /var/lib/apt/lis
 RUN mkdir -p /etc/mysql/conf.d \
 	&& { \
 		echo '[mysqld]'; \
+		echo 'user=mysql'; \
 		echo 'skip-host-cache'; \
 		echo 'skip-name-resolve'; \
 		echo 'datadir = /var/lib/mysql'; \
